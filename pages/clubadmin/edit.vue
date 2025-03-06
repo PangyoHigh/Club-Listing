@@ -17,7 +17,7 @@
           문의 확인하기
         </v-btn>
         <v-btn
-          v-if="!clubInfo.finished"
+          v-if="!clubInfo?.finished"
           variant="tonal"
           color="red"
           @click="end"
@@ -32,7 +32,7 @@
 
     <div class="pa-4 rounded-lg d-flex justify-center">
       <img
-        :src="clubInfo.image ?? '/PGHS.png'"
+        :src="clubInfo?.image ?? '/PGHS.png'"
         draggable="false"
         class="rounded-lg"
         style="width: 300px"
@@ -60,7 +60,7 @@
 
         만일, 이미지를 업로드하지 않는다면, 판교고 로고가 사용될 것입니다.
 
-        <v-img :src="clubInfo.image" class="rounded-lg mt-3"></v-img>
+        <v-img :src="clubInfo?.image" class="rounded-lg mt-3"></v-img>
       </v-alert>
       <br />
       <v-alert>
@@ -71,7 +71,7 @@
           @update:model-value="uploadPoster($event)"
         ></v-file-input>
 
-        <v-img :src="clubInfo.poster" class="rounded-lg"></v-img>
+        <v-img :src="clubInfo?.poster" class="rounded-lg"></v-img>
       </v-alert>
     </div>
 
@@ -88,7 +88,7 @@
         <tr>
           <td>관련 학과</td>
           <td>
-            <v-autocomplete
+            <v-combobox
               v-model="clubInfo.major"
               :items="majors"
               chips
@@ -100,7 +100,7 @@
               <template v-slot:chip="{ props, item }">
                 <v-chip v-bind="props" :text="item.raw.name"></v-chip>
               </template>
-            </v-autocomplete>
+            </v-combobox>
           </td>
         </tr>
         <tr>
@@ -206,12 +206,14 @@
 
     <div class="d-flex justify-center">
       <v-btn color="red" @click="update">업데이트</v-btn>
+      <v-btn color="black" class="ml-4" @click="deleteClub">삭제</v-btn>
     </div>
   </div>
 </template>
 
 <script setup>
 import { onAuthStateChanged } from "firebase/auth";
+import { remove } from "firebase/database";
 import { ref as sRef, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const loggedIn = ref(false);
@@ -359,7 +361,8 @@ const majors = [
 
 onMounted(async () => {
   const clubRef = dbRef($db, `clubs/${clubName}`);
-  await onValue(clubRef, (snapshot) => (clubInfo.value = snapshot.val()));
+  await onValue(clubRef, (snapshot) => (clubInfo.value = {...clubInfo.value, ...snapshot.val()}));
+
 
   onAuthStateChanged($auth, (user) => {
     account.value = user;
@@ -395,5 +398,18 @@ const uploadPoster = (f) => {
       clubInfo.value.poster = downloadURL;
     });
   });
+};
+const deleteClub = () => {
+  if (confirm("정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+    const clubRef = dbRef($db, `/clubs/${clubName}`);
+    set(clubRef, null)
+      .then(() => {
+        alert("삭제 완료되었습니다.");
+        router.push("/club"); // 홈 페이지로 이동
+      })
+      .catch((error) => {
+        alert("삭제 실패: " + error.message);
+      });
+  }
 };
 </script>

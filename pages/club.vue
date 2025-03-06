@@ -1,11 +1,11 @@
 <template>
   <div style="width: 100%" class="mx-4">
-    <br />
-
-    <h1 class="text-center">동아리</h1>
-
-    <br />
-
+    <div class="d-flex justify-center">
+      <h1 class="text-center mb-4">동아리</h1>
+    </div>
+    <v-btn variant="icon" :to="`/activityadmin/add`"
+      ><v-icon>mdi-pencil</v-icon> 수정</v-btn
+    >
     <v-text-field
       v-model="searchByName"
       label="동아리 이름으로 검색하기"
@@ -23,43 +23,39 @@
       label="학과로 동아리 검색하기"
     >
       <template v-slot:chip="{ props, item }">
-        <v-chip v-bind="props" :text="item.raw.name"></v-chip>
+        <v-chip v-bind="props" :text="item.name"></v-chip>
       </template>
     </v-combobox>
 
     <div class="d-flex ga-3">
-      <v-checkbox v-model="onlybelt" label="벨트 동아리만 보기"></v-checkbox>
-      <v-checkbox v-model="onlyteacher" label="교사주도 동아리만 보기"></v-checkbox>
+      <v-checkbox
+        color="amber-lighten-1"
+        v-model="onlybelt"
+        @click="() => (onlyteacher = false)"
+        label="벨트 동아리만 보기"
+      ></v-checkbox>
+      <v-checkbox
+        color="green-darken-2"
+        v-model="onlyteacher"
+        @click="() => (onlybelt = false)"
+        label="교사 주도 동아리만 보기"
+      ></v-checkbox>
     </div>
-
-    <br />
 
     <v-row class="d-flex justify-center">
       <v-col
         v-for="item in Object.values(list ?? {})
           .sort((a, b) => {
-            if (std === 'popular') {
-              return (
-                Object.keys(b?.joining ?? {}).length -
-                Object.keys(a?.joining ?? {}).length
-              );
-            } else if (std === 'lesscompetitive') {
-              return (
-                Object.keys(a?.joining ?? {}).length / a.memberNumber -
-                Object.keys(b?.joining ?? {}).length / b.memberNumber
-              );
-            }
-          })
-          .filter((a) => {
-            if (onlySeeCanJoin) {
-              const today = new Date();
-              const endDate = new Date(a.end);
-              endDate.setDate(endDate.getDate() + 1);
+            const order = {
+              belt: 1,
+              none: 2,
+              일반: 2,
+              teacher: 3,
+            };
 
-              return today <= endDate;
-            } else {
-              return true;
-            }
+            return (
+              (order[a?.type ?? 'none'] || 4) - (order[b?.type ?? 'none'] || 4)
+            );
           })
           .filter((a) => {
             if (onlybelt) {
@@ -79,7 +75,8 @@
             if (!searchByMajor.length) return true;
             if (searchByMajor) {
               if (!Object.keys(a)?.includes('major')) return false;
-              if (searchByMajor.some((r) => a.major?.includes(r))) return true;
+              if (searchByMajor.some((r) => a.major?.includes(r.value)))
+                return true;
             }
           })
           .filter((a) => {
@@ -122,113 +119,39 @@ const list = ref([]);
 const std = ref("popular");
 
 const onlySeeCanJoin = ref(false);
-const onlySeeExistInfo = ref(false);
-
 const onlybelt = ref(false);
 const onlyteacher = ref(false);
-
 const searchByName = ref("");
 const searchByMajor = ref([]);
-
-const majors = [
-  "간호학과",
-  "건설방재공학과",
-  "건축학과",
-  "건축공학과",
-  "게임학과",
-  "경영정보학과",
-  "경영학과",
-  "경제학과",
-  "경찰학과",
-  "관광학과",
-  "교육학과",
-  "국어교육과",
-  "국어국문학과",
-  "군사학과",
-  "기계공학과",
-  "기독교학과",
-  "노어노문학과",
-  "농업경제학과",
-  "농업자원경제학과",
-  "독어독문학과",
-  "동물자원학과",
-  "문예창작학과",
-  "문헌정보학과",
-  "문화재보존학과",
-  "물리치료학과",
-  "물리학과",
-  "미술학과",
-  "미술교육과",
-  "법학과",
-  "북한학과",
-  "불교학과",
-  "불어불문학과",
-  "사학과",
-  "사회학과",
-  "사회복지학과",
-  "산업공학과",
-  "생명과학과",
-  "세무학과",
-  "서어서문학과",
-  "섬유공학과",
-  "소방학과",
-  "수산생명의학과",
-  "수의학과",
-  "수학과",
-  "심리학과",
-  "식품영양학과",
-  "신학과",
-  "안전공학과",
-  "약학과",
-  "언어학과",
-  "에너지공학과",
-  "연극학과",
-  "영상학과",
-  "영어영문학과",
-  "유아교육과",
-  "윤리교육과",
-  "의학과",
-  "인공지능학과",
-  "일반사회교육과",
-  "일어일문학과",
-  "임상병리학과",
-  "임상병리학과",
-  "자유전공학부",
-  "임상병리학과",
-  "제과제빵과",
-  "임상병리학과",
-  "재료공학과",
-  "전기전자공학과",
-  "정보보안학과",
-  "정보통신공학과",
-  "정치외교학과",
-  "조경학과",
-  "조리과학과",
-  "중어중문학과",
-  "지리학과",
-  "지리교육과",
-  "지적학과",
-  "철도공학과",
-  "철학과",
-  "치의학과",
-  "치위생학과",
-  "커뮤니케이션학과",
-  "컴퓨터공학과",
-  "통계학과",
-  "특성화 학과",
-  "특수교육과",
-  "한문학과",
-  "한약학과",
-  "한의학과",
-  "항공운항학과",
-  "행정학과",
-  "화학공학과",
-  "화학과",
-];
+const majors = ref([]);
 
 onMounted(() => {
   const clubRef = dbRef($db, "clubs");
-  onValue(clubRef, (snapshot) => (list.value = snapshot.val()));
+  onValue(clubRef, (snapshot) => {
+    const clubs = snapshot.val();
+    list.value = clubs;
+
+    // 학과별 동아리 개수를 집계
+    const majorCounts = {};
+    Object.values(clubs ?? {}).forEach((club) => {
+      if (club.major) {
+        club.major.forEach((major) => {
+          if (!majorCounts[major]) {
+            majorCounts[major] = 0;
+          }
+          majorCounts[major]++;
+        });
+      }
+    });
+
+    // majors 목록 생성
+    majors.value = Object.keys(majorCounts)
+      .sort((a, b) => majorCounts[b] - majorCounts[a])
+      .map((major) => ({
+        title: `${major} (${majorCounts[major]})`,
+        value: major,
+      }));
+  });
 });
 </script>
 

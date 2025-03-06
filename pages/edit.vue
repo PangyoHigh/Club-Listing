@@ -13,7 +13,7 @@
       prepend-inner-icon="mdi-magnify"
     ></v-text-field>
 
-    <v-combobox
+    <v-autocomplete
       v-model="searchByMajor"
       :items="majors"
       chips
@@ -25,7 +25,7 @@
       <template v-slot:chip="{ props, item }">
         <v-chip v-bind="props" :text="item.raw.name"></v-chip>
       </template>
-    </v-combobox>
+    </v-autocomplete>
 
     <div class="d-flex ga-3">
       <v-checkbox v-model="onlySeeCanJoin" label="모집 중"></v-checkbox>
