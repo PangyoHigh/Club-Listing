@@ -4,7 +4,15 @@
     <v-row justify="center">
       <v-col cols="12" md="8" class="text-center">
         <v-img
-          :src="clubInfo?.image ?? '/PGHS.png'"
+          v-if="clubInfo?.image && clubInfo?.image !== ''"
+          :src="clubInfo.image"
+          height="100px"
+          class="rounded-lg mb-3"
+          draggable="false"
+        ></v-img>
+        <v-img
+          v-else
+          src="/PGHS.png"
           height="100px"
           class="rounded-lg mb-3"
           draggable="false"
@@ -223,16 +231,12 @@
             </v-card-title>
             <v-card-text>
               <v-list v-for="msg in messages" :key="msg">
-                <v-list-item-title>
-                  <v-chip
-                    v-if="msg.includes('ans:')"
-                    color="primary"
-                    class="ma-1"
-                  >
+                <v-list-item>
+                  <mark v-if="msg.includes('ans:')" class="my-1">
                     {{ msg.replace("ans:", "") }}
-                  </v-chip>
+                  </mark>
                   <span v-else>{{ msg }}</span>
-                </v-list-item-title>
+                </v-list-item>
               </v-list>
             </v-card-text>
           </v-card>

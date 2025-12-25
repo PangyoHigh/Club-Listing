@@ -1,7 +1,7 @@
 <template>
   <div class="page-container mx-4">
     <br /><br />
-    
+
     <v-card
       variant="tonal"
       prepend-icon="mdi-chevron-left"
@@ -12,16 +12,10 @@
 
     <br /><br />
 
-    <h1 class="text-center">{{ clubName }}</h1>
-    <h3 class="text-center club-leaders">
-      {{ clubInfo?.leader }} · {{ clubInfo?.coleader }}
+    <h1 class="text-center club-title">{{ clubName }}</h1>
+    <h3 class="text-center club-infos">
+      {{ items[clubName].place }} · {{ items[clubName].activity }}
     </h3>
-
-    <br />
-
-    <div v-if="clubInfo?.description" class="club-description">
-      {{ clubInfo?.description }}
-    </div>
 
     <div class="d-flex justify-center my-4">
       <v-rating
@@ -124,6 +118,105 @@ const route = useRoute();
 const clubName = route.query.clubname;
 const place = route.query.place;
 
+const items = {
+  무비앤모어: {
+    activity: "영화 상영 및 식음료 제공",
+    place: "시청각실",
+  },
+  "요리퐁 조리퐁": {
+    activity: "밤티라미수 만들기",
+    place: "가사실",
+  },
+  "축구 동아리": {
+    activity: "농구 미니게임",
+    place: "운동장",
+  },
+  "바이오 브릿지": {
+    activity: "성남 깃대종 보호 키링 만들기",
+    place: "1-1",
+  },
+  "인공지능 생각": {
+    activity: "인공지능 퀴즈, 프로젝트 전시 및 퀴즈",
+    place: "1-2",
+  },
+  방송부: {
+    activity: "노래방 + 와플, 핫초코",
+    place: "1-3",
+  },
+  "코드 크래프터": {
+    activity: "웹페이지 전시 및 일부 체험",
+    place: "1-4",
+  },
+  심장박동: {
+    activity: "타로상담과 향수 제작",
+    place: "1-5",
+  },
+  시네마드림: {
+    activity: "영화 촬영본 상영 후 경품 이벤트",
+    place: "1-6, 1-7",
+  },
+  레브: {
+    activity: "놀이를 통한 경제 흐름 체험",
+    place: "1-8",
+  },
+  아트캔버스: {
+    activity: "타투부스 + 미술 전시",
+    place: "2층 홈베이스",
+  },
+  스타트업: {
+    activity: "방탈출 체험 + 퀴즈",
+    place: "가온누리실",
+  },
+  글빛누리: {
+    activity: "종합 오락실(보드게임, 책갈피, 보물찾기)",
+    place: "도서관",
+  },
+  "코딩 인싸이트": {
+    activity: "게임 개발 결과 체험 + 활동 전시",
+    place: "컴퓨터실",
+  },
+  배구사랑: {
+    activity: "배구 경기 베팅 + 스파이크 리시브 체험",
+    place: "체육관",
+  },
+  "빛나는 팀": {
+    activity: "댄스부와 게임",
+    place: "2-4",
+  },
+  카이로스: {
+    activity: "가치관 기반 교류 행사",
+    place: "2-5",
+  },
+  "픽션 랩": {
+    activity: "스토리텔링형 폐교 방탈출",
+    place: "2-6",
+  },
+  티치스트: {
+    activity: "카페 체험 (상식 퀴즈, 미션)",
+    place: "2-7",
+  },
+  다이나믹스: {
+    activity: "작품 전시와 레이싱 체험",
+    place: "2-8",
+  },
+  아뜰리에: {
+    activity: "작품 전시와 레이싱 체험",
+    place: "3층 홈베이스",
+  },
+  네온: {
+    activity: "버시킹 공연",
+    place: "음악실",
+  },
+  케미스트: {
+    activity: "은하수 에이드 + 열감지 슬라임 만들기",
+    place: "과학실 1",
+  },
+  머큐리: {
+    activity: "달고나 만들기 체험 (화학반응 관찰)",
+    place: "과학실 2",
+  },
+};
+
 function roundRating(totalAccumulation, totalCount) {
   return totalCount ? (totalAccumulation / totalCount).toFixed(1) : 0;
 }
@@ -146,7 +239,7 @@ onMounted(async () => {
   const clubRef = dbRef($db, `clubs/${clubName}`);
   await onValue(clubRef, (snapshot) => (clubInfo.value = snapshot.val()));
 
-  const listRef = dbRef($db, `survey/${clubName}`);
+  const listRef = dbRef($db, `clubs/${clubName}`);
   await onValue(listRef, (snapshot) => {
     listInfo.value = snapshot.val();
   });

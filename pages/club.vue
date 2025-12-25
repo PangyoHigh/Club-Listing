@@ -45,6 +45,7 @@
     <v-row class="d-flex justify-center">
       <v-col
         v-for="item in Object.values(list ?? {})
+          .reverse()
           .sort((a, b) => {
             const order = {
               belt: 1,
@@ -53,23 +54,27 @@
               teacher: 3,
             };
 
-            return (
-              (order[a?.type ?? 'none'] || 4) - (order[b?.type ?? 'none'] || 4)
-            );
+            // Emergency clubs first, finished clubs last
+            const aPriority = a?.emergency
+              ? 0
+              : a?.finished
+              ? 4
+              : order[a?.type ?? 'none'] || 4;
+            const bPriority = b?.emergency
+              ? 0
+              : b?.finished
+              ? 4
+              : order[b?.type ?? 'none'] || 4;
+
+            return aPriority - bPriority;
           })
           .filter((a) => {
-            if (onlybelt) {
-              return a.type === 'belt';
-            } else {
-              return true;
-            }
+            if (onlybelt) return a.type === 'belt';
+            return true;
           })
           .filter((a) => {
-            if (onlyteacher) {
-              return a.type === 'teacher';
-            } else {
-              return true;
-            }
+            if (onlyteacher) return a.type === 'teacher';
+            return true;
           })
           .filter((a) => {
             if (!searchByMajor.length) return true;
@@ -80,7 +85,7 @@
             }
           })
           .filter((a) => {
-            if (a.name?.includes(searchByName)) return true;
+            return a.name?.includes(searchByName);
           })"
         :key="item.name"
         class="d-flex justify-center"
@@ -90,19 +95,26 @@
           :class="`club-card ${
             item.type === 'belt'
               ? 'gold-card'
-              : item.type === 'teacher'
+              : item.type === 'teacher' || item.type === '교사 주도'
               ? 'green-card'
               : ''
-          }`"
+          } ${item.finished ? 'blurred-card' : ''}`"
           elevation="4"
         >
+          <!-- Emergency Icon -->
+
           <v-img
             :src="item?.image || item?.poster || '/PGHS.png'"
             class="club-card-image"
-            height="150"
+            :height="item.emergency ? 110 : 150"
             cover
           ></v-img>
 
+          <div class="d-flex justify-center">
+            <v-chip v-if="item.emergency" class="mt-2">
+              <v-icon color="red">mdi-alert</v-icon> 인원 부족 <span v-if="item.acc && item.acc !== 0">({{ item?.acc }}명)</span>
+            </v-chip>
+          </div>
           <p class="club-card-title mb-3" style="font-size: 15px">
             {{ item.name }}
           </p>
@@ -116,9 +128,7 @@
 const { $db } = useNuxtApp();
 
 const list = ref([]);
-const std = ref("popular");
 
-const onlySeeCanJoin = ref(false);
 const onlybelt = ref(false);
 const onlyteacher = ref(false);
 const searchByName = ref("");
@@ -192,5 +202,19 @@ onMounted(() => {
 
 .green-card {
   border: 5px solid green !important;
+}
+
+.blurred-card {
+  filter: blur(1px);
+  opacity: 0.6;
+}
+
+/* Emergency icon styling */
+.emergency-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 24px;
+  z-index: 5;
 }
 </style>

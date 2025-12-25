@@ -17,13 +17,12 @@
 
     <v-card variant="tonal">
       <v-card-text>
-        가중치 점수 = (평점 총합 / 설문자 수) x log(설문자수 + 1)
+        점수는 동아리가 지금까지 받은 모든 평점을 합한 값입니다. 순위는
+        실시간으로 업데이트 됩니다.
       </v-card-text>
     </v-card>
 
     <br />
-
-    <h1 class="text-center">동아리</h1>
 
     <div class="top-clubs">
       <v-card
@@ -51,35 +50,32 @@
           size="small"
           class="rating"
         ></v-rating>
-        <v-card-subtitle class="club-info">
+        <v-card-subtitle class="club-info d-flex align-center justify-center">
           <div>
-            <span class="label">등수:</span>
-            <span class="value"
-              ><mark>{{ name + 1 }}등</mark></span
-            >
+            <div>
+              <span class="label">등수:</span>
+              <span class="value"
+                ><mark>{{ name + 1 }}등</mark></span
+              >
+            </div>
+            <div>
+              <span class="value">총 점수: {{ formatter.format(item.totalAccumulation) }}</span>
+            </div>
           </div>
+
           <div>
-            <span class="value"
-              >가중치 점수:
-              {{
-                (
-                  (item.totalAccumulation / item.totalCount) *
-                  Math.log10(item.totalCount + 1)
-                ).toFixed(2)
-              }}</span
-            >
-          </div>
-          <div>
-            <span class="value">
-              <span class="label">평균 점수:</span>
-              <span class="value">{{
-                (item.totalAccumulation / item.totalCount).toFixed(2)
-              }}</span>
-            </span>
-          </div>
-          <div>
-            <span class="label">설문 수:</span>
-            <span class="value">{{ item.totalCount }}</span>
+            <div>
+              <span class="value">
+                <span class="label">평균 점수:</span>
+                <span class="value">{{
+                  (item.totalAccumulation / item.totalCount).toFixed(2)
+                }}</span>
+              </span>
+            </div>
+            <div>
+              <span class="label">설문 수:</span>
+              <span class="value">{{ item.totalCount }}</span>
+            </div>
           </div>
         </v-card-subtitle>
       </v-card>
@@ -97,45 +93,35 @@
         class="club-card"
         variant="outlined"
       >
-        <template v-if="Object.keys(list ?? {})[name + 3] === '다이나믹스'">
-          <v-card elevation="0">
-            <v-card-subtitle class="text-center">다이나믹스는 포함시키지 않습니다.</v-card-subtitle>
-          </v-card>
-        </template>
-        <template v-else>
           <p
-            v-for="item in Object.keys(list ?? {})[name + 3].split(' ')"
-            :key="item"
-            class="club-name text-h4"
-          >
-            {{ item }}
-          </p>
-          <v-rating
-            :model-value="roundRating(item.totalAccumulation, item.totalCount)"
-            color="amber"
-            readonly
-            half-increments
-            size="small"
-            class="rating"
-          ></v-rating>
-          <v-card-subtitle class="club-info">
+          v-for="item in Object.keys(list ?? {})[name].split(' ')"
+          :key="item"
+          class="club-name text-h4"
+        >
+          {{ item }}
+        </p>
+        <v-rating
+          :model-value="roundRating(item.totalAccumulation, item.totalCount)"
+          color="amber"
+          readonly
+          half-increments
+          size="small"
+          class="rating"
+        ></v-rating>
+        <v-card-subtitle class="club-info d-flex align-center justify-center">
+          <div>
             <div>
               <span class="label">등수:</span>
               <span class="value"
-                ><mark>{{ name + 4 }}등</mark></span
+                ><mark>{{ name + 1 }}등</mark></span
               >
             </div>
             <div>
-              <span class="value"
-                >가중치 점수:
-                {{
-                  (
-                    (item.totalAccumulation / item.totalCount) *
-                    Math.log10(item.totalCount + 1)
-                  ).toFixed(2)
-                }}</span
-              >
+              <span class="value">총 점수: {{ formatter.format(item.totalAccumulation) }}</span>
             </div>
+          </div>
+
+          <div>
             <div>
               <span class="value">
                 <span class="label">평균 점수:</span>
@@ -148,17 +134,14 @@
               <span class="label">설문 수:</span>
               <span class="value">{{ item.totalCount }}</span>
             </div>
-          </v-card-subtitle>
-        </template>
+          </div>
+        </v-card-subtitle>
       </v-card>
     </div>
   </div>
 </template>
 
 <script setup>
-import { get } from "firebase/database";
-import { onAuthStateChanged } from "firebase/auth";
-
 const { $db, $auth } = useNuxtApp();
 const router = useRouter();
 
@@ -167,7 +150,7 @@ const club = ref("");
 const account = ref(null);
 
 const fetchData = async () => {
-  const clubRef = dbRef($db, "survey");
+  const clubRef = dbRef($db, "clubs");
   const surveyData = await new Promise((resolve) => {
     onValue(clubRef, (snapshot) => resolve(snapshot.val()));
   });
@@ -178,10 +161,8 @@ const fetchData = async () => {
   });
 
   const sortedEntries = Object.entries(surveyData).sort(([, a], [, b]) => {
-    const scoreA =
-      (a.totalAccumulation / a.totalCount) * Math.log10(a.totalCount + 1);
-    const scoreB =
-      (b.totalAccumulation / b.totalCount) * Math.log10(b.totalCount + 1);
+    const scoreA = a.totalAccumulation;
+    const scoreB = b.totalAccumulation;
     return scoreB - scoreA;
   });
 
@@ -195,6 +176,11 @@ const getColor = (rank) => {
   if (rank === 2) return "#CD7F32";
   return "transparent";
 };
+
+const formatter = new Intl.NumberFormat("ko-KR", {
+  notation: "compact",
+  compactDisplay: "short"
+});
 
 onMounted(() => {
   fetchData();
@@ -212,16 +198,8 @@ h1 {
   margin-bottom: 20px;
 }
 
-.top-clubs,
-.other-clubs {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .club-card {
   width: 100%;
-  max-width: 300px;
   margin-bottom: 16px;
   padding: 8px;
   border-radius: 8px;
@@ -243,7 +221,7 @@ h1 {
 }
 
 .club-name {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: bold;
   text-align: center;
   margin-top: 8px;

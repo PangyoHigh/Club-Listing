@@ -112,6 +112,23 @@ onMounted(() => {
     const type = dbRef($db, `/everyone/${user?.displayName}/type`);
     onValue(type, (snapshot) => (typeofAccount.value = snapshot.val()));
   });
+
+  // if (process.client) {
+  //   window.CHIPP_APP_URL = "https://-46271.chipp.ai";
+  //   window.CHIPP_APP_ID = 46271;
+
+  //   const link = document.createElement("link");
+  //   link.rel = "stylesheet";
+  //   link.href =
+  //     "https://storage.googleapis.com/chipp-chat-widget-assets/build/bundle.css";
+  //   document.head.appendChild(link);
+
+  //   const script = document.createElement("script");
+  //   script.src =
+  //     "https://storage.googleapis.com/chipp-chat-widget-assets/build/bundle.js";
+  //   script.defer = true;
+  //   document.body.appendChild(script);
+  // }
 });
 
 useHead({

@@ -16,6 +16,20 @@
         >
           문의 확인하기
         </v-btn>
+        <v-btn variant="tonal" @click="changeEmergency" color="red">
+          인원부족 상태 {{ clubInfo.emergency ? "해제하기" : "활성화하기" }}
+          <v-icon end>mdi-alert</v-icon>
+        </v-btn>
+      </div>
+
+      <v-text-field
+        v-if="clubInfo.emergency"
+        v-model="clubInfo.acc"
+        variant="outlined"
+        label="필요한 인원 수"
+      ></v-text-field>
+
+      <div class="d-flex justify-center ga-5 mb-3">
         <v-btn
           v-if="!clubInfo?.finished"
           variant="tonal"
@@ -237,6 +251,7 @@ const clubInfo = ref({
   acc: 0,
   messaged: 0,
   formlink: "",
+  emergency: false,
 });
 const account = ref({});
 
@@ -361,8 +376,10 @@ const majors = [
 
 onMounted(async () => {
   const clubRef = dbRef($db, `clubs/${clubName}`);
-  await onValue(clubRef, (snapshot) => (clubInfo.value = {...clubInfo.value, ...snapshot.val()}));
-
+  await onValue(
+    clubRef,
+    (snapshot) => (clubInfo.value = { ...clubInfo.value, ...snapshot.val() })
+  );
 
   onAuthStateChanged($auth, (user) => {
     account.value = user;
@@ -380,25 +397,124 @@ const update = () => {
 };
 
 const uploadHeader = (f) => {
-  console.log(f);
-  const storageRef = sRef($storage, `logos/${clubName}`);
+  if (!f.type.startsWith("image/")) {
+    console.error("File is not an image");
+    return;
+  }
 
-  uploadBytes(storageRef, f).then((snapshot) => {
-    getDownloadURL(snapshot.ref).then((downloadURL) => {
-      clubInfo.value.image = downloadURL;
-    });
-  });
+  const reader = new FileReader();
+  reader.readAsDataURL(f);
+
+  reader.onload = (event) => {
+    const img = new Image();
+    img.src = event.target.result;
+
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Define max width and height
+      const maxWidth = 500;
+      const maxHeight = 500;
+      let width = img.width;
+      let height = img.height;
+
+      // Resize maintaining aspect ratio
+      if (width > maxWidth || height > maxHeight) {
+        if (width > height) {
+          height *= maxWidth / width;
+          width = maxWidth;
+        } else {
+          width *= maxHeight / height;
+          height = maxHeight;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          const resizedFile = new File([blob], f.name, {
+            type: "image/jpeg",
+            lastModified: Date.now(),
+          });
+
+          // Upload the resized image
+          const storageRef = sRef($storage, `logos/${clubName}`);
+          uploadBytes(storageRef, resizedFile).then((snapshot) => {
+            getDownloadURL(snapshot.ref).then((downloadURL) => {
+              clubInfo.value.image = downloadURL;
+            });
+          });
+        },
+        "image/jpeg",
+        0.7 // Adjust quality (0.0 - 1.0)
+      );
+    };
+  };
 };
+
 const uploadPoster = (f) => {
   console.log(f);
-  const storageRef = sRef($storage, `poster/${clubName}`);
 
-  uploadBytes(storageRef, f).then((snapshot) => {
-    getDownloadURL(snapshot.ref).then((downloadURL) => {
-      clubInfo.value.poster = downloadURL;
-    });
-  });
+  const maxWidth = 800; // Set your desired max width
+  const maxHeight = 800; // Set your desired max height
+
+  const reader = new FileReader();
+  reader.readAsDataURL(f);
+  reader.onload = (event) => {
+    const img = new Image();
+    img.src = event.target.result;
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+
+      // Maintain aspect ratio
+      if (width > maxWidth || height > maxHeight) {
+        const aspectRatio = width / height;
+        if (width > height) {
+          width = maxWidth;
+          height = Math.round(maxWidth / aspectRatio);
+        } else {
+          height = maxHeight;
+          width = Math.round(maxHeight * aspectRatio);
+        }
+      }
+
+      // Create a canvas to resize the image
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+
+      // Draw resized image
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert to Blob
+      canvas.toBlob(
+        (blob) => {
+          const resizedFile = new File([blob], f.name, {
+            type: "image/jpeg",
+            lastModified: Date.now(),
+          });
+
+          // Upload to Firebase Storage
+          const storageRef = sRef($storage, `poster/${clubName}`);
+          uploadBytes(storageRef, resizedFile).then((snapshot) => {
+            getDownloadURL(snapshot.ref).then((downloadURL) => {
+              clubInfo.value.poster = downloadURL;
+            });
+          });
+        },
+        "image/jpeg",
+        0.7
+      ); // Adjust quality if needed
+    };
+  };
 };
+
 const deleteClub = () => {
   if (confirm("정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
     const clubRef = dbRef($db, `/clubs/${clubName}`);
@@ -411,5 +527,11 @@ const deleteClub = () => {
         alert("삭제 실패: " + error.message);
       });
   }
+};
+
+const changeEmergency = () => {
+  clubInfo.value.emergency = !clubInfo.value.emergency;
+  const messageRef = dbRef($db, `clubs/${clubName}`);
+  set(messageRef, clubInfo.value);
 };
 </script>
