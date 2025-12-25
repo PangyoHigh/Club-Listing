@@ -11,22 +11,18 @@
     "update": "yarn upgrade && ncu -u && yarn"
   },
   "dependencies": {
-    "@agent-embed/js": "^0.0.17",
     "@mdi/font": "^7.4.47",
-    "@vite-pwa/nuxt": "^0.10.6",
-    "@vueuse/core": "^11.2.0",
-    "firebase": "^11.0.1",
-    "freegptjs": "^0.0.2",
-    "nuxt": "^3.14.0",
-    "openai": "^4.71.0",
-    "vue": "^3.5.12",
-    "vue-router": "^4.4.5",
-    "vue-search-select": "^3.2.0",
-    "vuetify-nuxt-module": "^0.18.3"
+    "@vite-pwa/nuxt": "^1.1.0",
+    "@vueuse/core": "^14.1.0",
+    "firebase": "^12.7.0",
+    "nuxt": "^4.2.2",
+    "vue": "^3.5.26",
+    "vue-router": "^4.6.4",
+    "vuetify-nuxt-module": "^0.19.1"
   },
   "devDependencies": {
-    "vite-plugin-vuetify": "^2.0.4",
-    "vuetify": "^3.7.4"
+    "vite-plugin-vuetify": "^2.1.2",
+    "vuetify": "^3.11.5"
   },
   "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }

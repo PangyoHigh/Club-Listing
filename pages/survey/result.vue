@@ -26,7 +26,7 @@
 
     <div class="top-clubs">
       <v-card
-        v-for="(item, name) in Object.values(list ?? {}).slice(0, 3)"
+        v-for="(item, name) in Object.values(list ?? {})"
         :key="Object.keys(list ?? {})[name]"
         :to="`/survey/view?clubname=${Object.keys(list ?? {})[name]}&place=${
           name + 1
@@ -50,67 +50,7 @@
           size="small"
           class="rating"
         ></v-rating>
-        <v-card-subtitle class="club-info d-flex align-center justify-center">
-          <div>
-            <div>
-              <span class="label">등수:</span>
-              <span class="value"
-                ><mark>{{ name + 1 }}등</mark></span
-              >
-            </div>
-            <div>
-              <span class="value"
-                >총 점수: {{ formatter.format(item.totalAccumulation) }}</span
-              >
-            </div>
-          </div>
-
-          <div>
-            <div>
-              <span class="value">
-                <span class="label">평균 점수:</span>
-                <span class="value">{{
-                  (item.totalAccumulation / item.totalCount).toFixed(2)
-                }}</span>
-              </span>
-            </div>
-            <div>
-              <span class="label">설문 수:</span>
-              <span class="value">{{ item.totalCount }}</span>
-            </div>
-          </div>
-        </v-card-subtitle>
-      </v-card>
-    </div>
-
-    <br /><br />
-
-    <div class="other-clubs">
-      <v-card
-        v-for="(item, name) in Object.values(list ?? {}).slice(3)"
-        :key="Object.keys(list ?? {})[name + 3]"
-        :to="`/survey/view?clubname=${
-          Object.keys(list ?? {})[name + 3]
-        }&place=${name + 4}`"
-        class="club-card"
-        variant="outlined"
-      >
-        <p
-          v-for="item in Object.keys(list ?? {})[name].split(' ')"
-          :key="item"
-          class="club-name text-h4"
-        >
-          {{ item }}
-        </p>
-        <v-rating
-          :model-value="roundRating(item.totalAccumulation, item.totalCount)"
-          color="amber"
-          readonly
-          half-increments
-          size="small"
-          class="rating"
-        ></v-rating>
-        <v-card-subtitle class="club-info d-flex align-center justify-center">
+        <v-card-subtitle class="club-info d-flex align-center justify-center ga-4">
           <div>
             <div>
               <span class="label">등수:</span>
