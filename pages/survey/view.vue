@@ -93,6 +93,20 @@
     </v-card>
 
     <br /><br />
+
+    
+    <v-footer
+      style="
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        border-top: 1px solid #e0e0e0;
+      "
+      class="d-flex flex-column py-1"
+    >
+      <p>개발자 20416이현승</p>
+    </v-footer>
   </div>
 </template>
 

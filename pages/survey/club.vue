@@ -25,7 +25,6 @@
         half-increments
         color="amber"
       ></v-rating>
-
       <v-textarea
         v-model="review"
         variant="outlined"
@@ -35,14 +34,11 @@
       <v-alert class="text-left">
         후기를 남기면 학번, 이름, 후기가 공개됩니다. 평점은 공개되지 않습니다.
       </v-alert>
-
-      <br />
-
       <v-btn
         v-if="!dialog"
         color="primary"
         block
-        rounded
+        variant="tonal"
         :disabled="dialog"
         @click="submit"
       >
@@ -137,9 +133,31 @@
               계속
             </v-btn>
           </div>
+
+          <v-btn
+            @click="loginid = false"
+            color="secondary"
+            block
+            variant="tonal"
+          >
+            돌아가기
+          </v-btn>
         </v-card-text>
       </v-card>
     </v-dialog>
+
+    <v-footer
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        border-top: 1px solid #e0e0e0;
+      "
+      class="d-flex flex-column py-1"
+    >
+      <p>개발자 20416이현승</p>
+    </v-footer>
   </div>
 </template>
 
@@ -169,7 +187,6 @@ const dialog = ref(false);
 const notloggedin = ref(false);
 const loading = ref(false);
 const clubData = ref({});
-const matched = ref(false);
 
 const loginid = ref(false);
 const id = ref("");
@@ -306,15 +323,6 @@ onMounted(() => {
         dialog.value = true;
       }
     });
-
-    if (
-      checkIfMember(account.value.displayName) === clubName ||
-      clubName.includes(checkIfMember(account.value.displayName))
-    ) {
-      matched.value = true;
-    } else {
-      matched.value = false;
-    }
   });
 
   const clubInfo = dbRef($db, `clubs/${clubName}`);

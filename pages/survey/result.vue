@@ -59,7 +59,9 @@
               >
             </div>
             <div>
-              <span class="value">총 점수: {{ formatter.format(item.totalAccumulation) }}</span>
+              <span class="value"
+                >총 점수: {{ formatter.format(item.totalAccumulation) }}</span
+              >
             </div>
           </div>
 
@@ -93,7 +95,7 @@
         class="club-card"
         variant="outlined"
       >
-          <p
+        <p
           v-for="item in Object.keys(list ?? {})[name].split(' ')"
           :key="item"
           class="club-name text-h4"
@@ -117,7 +119,9 @@
               >
             </div>
             <div>
-              <span class="value">총 점수: {{ formatter.format(item.totalAccumulation) }}</span>
+              <span class="value"
+                >총 점수: {{ formatter.format(item.totalAccumulation) }}</span
+              >
             </div>
           </div>
 
@@ -138,6 +142,19 @@
         </v-card-subtitle>
       </v-card>
     </div>
+
+    <v-footer
+      style="
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        border-top: 1px solid #e0e0e0;
+      "
+      class="d-flex flex-column py-1"
+    >
+      <p>개발자 20416이현승</p>
+    </v-footer>
   </div>
 </template>
 
@@ -179,7 +196,7 @@ const getColor = (rank) => {
 
 const formatter = new Intl.NumberFormat("ko-KR", {
   notation: "compact",
-  compactDisplay: "short"
+  compactDisplay: "short",
 });
 
 onMounted(() => {

@@ -31,6 +31,19 @@
         no-data-text="검색 결과가 없습니다."
       ></v-autocomplete>
     </div>
+
+    <v-footer
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        border-top: 1px solid #e0e0e0;
+      "
+      class="d-flex flex-column py-1"
+    >
+      <p>개발자 20416이현승</p>
+    </v-footer>
   </div>
 </template>
 
